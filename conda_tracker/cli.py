@@ -8,16 +8,30 @@ from conda_tracker import modifier
 
 @click.group()
 def cli():
-    """Manage conda recipes."""
+    """Link git repositories and patches into an aggregate repository.
+
+
+    conda-tracker includes multiple subcommands to assist in repo tracking:
+    $  conda-tracker add [OPTIONS] RECIPE_URL
+    $  conda-tracker update [OPTIONS] [RECIPE] [BRANCH]
+    $  conda-tracker patch [OPTIONS] RECIPE PATCH_FILE
+
+    To see more information regarding each subcommand, type:
+    $ conda-tracker subcommand --help
+    """
 
 
 @cli.command()
 @click.argument('recipe_url')
 def add(recipe_url):
-    """Add the given recipe to the repository.
+    """Add a repository to the aggregate repository.
 
-    Positional arguments:
-    recipe_url -- the url to the repository containing the conda recipe
+    conda-tracker add requires the url of the repository as an argument.
+    This url can be either a link to the repo on a git hosting service,
+    or a git repository itself.
+
+    Example:
+    $ conda-tracker add https://github.com/conda/conda-tracker.git
     """
     recipe_name = recipe_url.rsplit('/', 1)[-1]
 
@@ -34,14 +48,16 @@ def add(recipe_url):
 @click.argument('branch', required=False)
 @click.option('--all-recipes', is_flag=True)
 def update(recipe, branch, all_recipes):
-    """Update the given recipe.
+    """Update a repository to a specific branch or to the master branch.
 
-    Positional arguments:
-    recipe -- the name of the recipe as given by the directory name
+    conda-tracker update takes either the name of the repository or the
+    --all-recipes command line flag. If the name of the repository is
+    given a branch can also be given to update to a specific branch.
 
-    Optional arguments:
-    branch -- the name of the branch to pull from
-    all_recipes -- update all recipes located in the directory
+    Examples:
+    $  conda-tracker update some_repository
+    $  conda-tracker update some_repository some_branch
+    $  conda-tracker update --all-recipes
     """
     cmd = ['git', 'subrepo', 'pull']
 
@@ -62,14 +78,16 @@ def update(recipe, branch, all_recipes):
 @click.argument('patch_file', type=click.Path(exists=True))
 @click.option('--remove', is_flag=True)
 def patch(recipe, patch_file, remove):
-    """Apply the given patch to the corresponding recipe in the directory.
+    """Apply a patch to the corresponding repository in the directory.
 
-    Positional arguments:
-    recipe -- the name of the recipe as given by the directory name
-    patch_file -- the path to the patch file
+    conda-tracker patch requires as positional arguments the name of the
+    repository to be patched as well as the file path to the patch file.
+    Optionally, the --remove flag can be used to delete the patch file
+    from the directory.
 
-    Optional arguments:
-    remove -- delete the patch file from the directory
+    Examples:
+    $  conda-tracker my_sub_repository 0001-remove-file.patch
+    $  conda-tracker my_sub_repository 0001-remove-file.patch --remove
     """
     patch_file = modifier.modify_patch(patch_file, recipe)
 
