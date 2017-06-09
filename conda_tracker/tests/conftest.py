@@ -56,7 +56,7 @@ def test_subrepo(gitdir, another_test_repo):
     patch_file = repodir.join('0001-removed-readme-file.patch')
     subrepodir = gitdir.join('test_subrepo')
 
-    subprocess.call(['cp', patch_file, subrepodir])
+    subprocess.call(['cp', str(patch_file), str(subrepodir)])
 
     subrepodir.chdir()
 
