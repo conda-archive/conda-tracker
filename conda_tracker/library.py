@@ -15,21 +15,29 @@ def repository_name(repository_url):
     return name.replace('.git', '')
 
 
-def add_repository(repository_url):
-    """Add a sub-repository to the aggregate repository."""
+def add_repository(repository_url, nested=False):
+    """Add a sub-repository to the aggregate repository.
 
-    repo_subdir = '{0}/{0}' .format(repository_name(repository_url))
+    Positional arguments:
+    repository_url -- the url to the repository to add
+
+    Optional arguments:
+    nested -- whether or not the subrepo is nested inside its own package
+    """
+
+    if nested:
+        repo_subdir = '{0}/{0}' .format(repository_name(repository_url))
+    else:
+        repo_subdir = repository_name(repository_url)
 
     subprocess.call(['git', 'subrepo', 'clone', repository_url, repo_subdir])
 
 
-def update_repository(repository, branch, all_repositories=False):
+def update_repository(repository=None, branch=None, all_repositories=False):
     """Update the sub-repository to the lastest branch or to a specific branch.
 
-    Positional arguments:
-    repository -- the name of the repository as given by the directory name
-
     Optional arguments:
+    repository -- the name of the repository as given by the directory name
     branch -- the name of the branch to pull from
     all_repositories -- update all repositorys located in the directory
     """
