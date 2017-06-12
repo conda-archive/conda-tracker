@@ -3,3 +3,4 @@ omit =
     */setup.py
     */__init__.py
     conda_tracker/tests/*
+    */__main__.py

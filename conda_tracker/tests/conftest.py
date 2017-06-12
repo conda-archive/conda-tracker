@@ -62,8 +62,17 @@ def test_subrepo(gitdir, another_test_repo):
 
 
 @pytest.fixture
+def mock_call(mocker):
+    return mocker.patch('subprocess.call')
+
+@pytest.fixture
 def test_repo():
     return 'https://github.com/conda/conda-docs'
+
+
+@pytest.fixture
+def test_repo_name(test_repo):
+    return test_repo.rsplit('/', 1)[-1]
 
 
 @pytest.fixture

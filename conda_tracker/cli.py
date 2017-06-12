@@ -32,7 +32,7 @@ def add(recipe_url):
     Example:
     $ conda-tracker add https://github.com/conda/conda-tracker.git
     """
-    library.add_repository(recipe_url)
+    library.add_repository(recipe_url, nested=True)
 
 
 @cli.command()

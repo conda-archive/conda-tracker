@@ -1,18 +1,18 @@
-def modify_patch(patch_file, recipe=None, nested=True):
+def modify_patch(patch_file, repository=None, nested=True):
     """Modify the contents of the patch file to find the subrepo.
 
     Positional arguments:
-    recipe -- the name of the recipe as given by the directory name
+    repository -- the name of the repository as given by the directory name
     patch_file -- the path to the patch file
 
     Keyword arguments:
     nested -- whether or not the subrepo is nested inside its own package
     """
-    if recipe is not None:
+    if repository is not None:
         if nested:
-            subdir = '{0}/{0}/' .format(recipe)
+            subdir = '{0}/{0}/' .format(repository)
         else:
-            subdir = '{}/' .format(recipe)
+            subdir = '{}/' .format(repository)
     else:
         subdir = ''
 
