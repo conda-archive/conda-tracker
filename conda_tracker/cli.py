@@ -1,9 +1,8 @@
 import os
-import subprocess
 
 import click
 
-from conda_tracker import modifier
+from conda_tracker import library
 
 
 @click.group()
@@ -33,14 +32,7 @@ def add(recipe_url):
     Example:
     $ conda-tracker add https://github.com/conda/conda-tracker.git
     """
-    recipe_name = recipe_url.rsplit('/', 1)[-1]
-
-    # if recipe_url is a git repository, remove the .git ending
-    recipe_name = recipe_name.replace('.git', '')
-
-    recipe_subdir = '{0}/{0}' .format(recipe_name)
-
-    subprocess.call(['git', 'subrepo', 'clone', recipe_url, recipe_subdir])
+    library.add_repository(recipe_url)
 
 
 @cli.command()
@@ -59,18 +51,7 @@ def update(recipe, branch, all_recipes):
     $  conda-tracker update some_repository some_branch
     $  conda-tracker update --all-recipes
     """
-    cmd = ['git', 'subrepo', 'pull']
-
-    if branch and recipe:
-        cmd.extend([recipe, '-b', branch])
-
-    elif recipe:
-        cmd.append(recipe)
-
-    elif all_recipes:
-        cmd.append('--all')
-
-    subprocess.call(cmd)
+    library.update_repository(recipe, branch, all_recipes)
 
 
 @cli.command()
@@ -89,11 +70,9 @@ def patch(recipe, patch_file, remove):
     $  conda-tracker my_sub_repository 0001-remove-file.patch
     $  conda-tracker my_sub_repository 0001-remove-file.patch --remove
     """
-    patch_file = modifier.modify_patch(patch_file, recipe)
-
     if remove:
         if click.confirm('Are you sure you want to remove {}?'.format(patch_file)):
             os.remove(patch_file)
 
     else:
-        subprocess.call(['git', 'am', patch_file, '-3'])
+        library.patch_repository(recipe, patch_file, nested=True)

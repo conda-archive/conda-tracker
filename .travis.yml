@@ -35,4 +35,4 @@ install:
 script:
   - git config --global user.email "user@email.com"
   - git config --global user.name "User Name"
-  - pytest -v --cov=.
+  - pytest -s -v --cov=.
