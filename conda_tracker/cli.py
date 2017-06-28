@@ -22,7 +22,8 @@ def cli():
 
 @cli.command()
 @click.argument('recipe_url')
-def add(recipe_url):
+@click.argument('branch', default='master')
+def add(recipe_url, branch):
     """Add a repository to the aggregate repository.
 
     conda-tracker add requires the url of the repository as an argument.
@@ -32,7 +33,8 @@ def add(recipe_url):
     Example:
     $ conda-tracker add https://github.com/conda/conda-tracker.git
     """
-    library.add_repository(recipe_url, nested=True)
+
+    library.add_repository(recipe_url, branch, nested=True)
 
 
 @cli.command()
