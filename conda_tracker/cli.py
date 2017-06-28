@@ -74,7 +74,11 @@ def patch(recipe, patch_file, remove):
     """
     if remove:
         if click.confirm('Are you sure you want to remove {}?'.format(patch_file)):
-            os.remove(patch_file)
+            try:
+                os.remove(patch_file)
+                print('{} successfully removed.' .format(patch_file))
+            except OSError:
+                print('Unable to remove {}.' .format(patch_file))
 
     else:
         library.patch_repository(recipe, patch_file, nested=True)
