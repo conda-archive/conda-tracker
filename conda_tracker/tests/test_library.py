@@ -17,12 +17,13 @@ def test_add_repository(mock_call, test_repo, test_repo_name):
     library.add_repository(test_repo)
 
     mock_call.assert_called_once_with(['git', 'subrepo', 'clone', test_repo,
-                                       test_repo_name])
+                                       test_repo_name, '-b', 'master'])
 
-    library.add_repository(test_repo, nested=True)
+    library.add_repository(test_repo, branch='channels', nested=True)
 
     mock_call.assert_called_with(['git', 'subrepo', 'clone', test_repo,
-                                  '{0}/{0}' .format(test_repo_name)])
+                                  '{0}/{0}' .format(test_repo_name),
+                                  '-b', 'channels'])
 
 
 def test_update_repository(mock_call, test_repo_name):
