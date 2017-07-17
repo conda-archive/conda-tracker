@@ -1,6 +1,5 @@
+import pkg_resources
 import subprocess
-
-from conda_tracker import modifier
 
 
 def repository_name(repository_url):
@@ -15,58 +14,78 @@ def repository_name(repository_url):
     return name.replace('.git', '')
 
 
-def add_repository(repository_url, branch='master', nested=False):
+def retrieve_latest_commit(branch):
+    """Retrieve the last commit made on the given branch."""
+    subprocess.call(['git', 'rev-parse', branch])
+
+
+def retrieve_updated_submodules(submodule='.'):
+    """Retrieve a list of submodules that have been updated.
+
+    Updated submodules' hashes start with '+' when the command
+    git submodule status is run. The updated submodules are
+    returned in a list with the '+' stripped from their hashes.
+    """
+    submodules = subprocess.check_output(['git', 'submodule', 'status',
+                                         submodule], universal_newlines=True)
+
+    return [submodule.lstrip('+') for submodule in submodules.splitlines()
+            if submodule.startswith('+')]
+
+
+def retrieve_submodule_commits(branch):
+    """Retrieve the current submodule commit hashes for a specific branch."""
+    return subprocess.check_output(['git', 'ls-tree', branch],
+                                   universal_newlines=True).splitlines()
+
+
+def retrieve_submodule_files_changed():
+    diff_script = pkg_resources.resource_filename('conda_tracker',
+                                                  'diff-script.sh')
+
+    diff = subprocess.check_output(['bash', diff_script],
+                                   universal_newlines=True).splitlines()
+
+    submodule_changed_files = [line.split() for line in diff]
+
+    submodules_with_recipe_changes = set()
+    for submodule in submodule_changed_files:
+        for file in submodule:
+            if 'recipe/' in file:
+                submodules_with_recipe_changes.add(submodule[0])
+
+    return submodules_with_recipe_changes
+
+
+def change_submodule_revision(submodule, revision):
+    """Change the submodule commit reference to a different revision.
+
+    Positional arguments:
+    submodule -- the submodule to change
+    revision -- the commit to point to
+    """
+    revision_script = pkg_resources.resource_filename('conda_tracker',
+                                                      'change_revision.sh')
+
+    subprocess.call(['bash', revision_script, submodule, revision])
+
+
+def add_repository(repository_url):
     """Add a sub-repository to the aggregate repository.
 
     Positional arguments:
     repository_url -- the url to the repository to add
 
     Optional arguments:
-    branch -- the specific branch to pull
     nested -- whether or not the subrepo is nested inside its own package
     """
-
-    if nested:
-        repo_subdir = '{0}/{0}' .format(repository_name(repository_url))
-    else:
-        repo_subdir = repository_name(repository_url)
-
-    subprocess.call(['git', 'subrepo', 'clone', repository_url,
-                     repo_subdir, '-b', branch])
+    subprocess.call(['git', 'submodule', 'add', repository_url])
 
 
-def update_repository(repository=None, branch=None, all_repositories=False):
-    """Update the sub-repository to the lastest branch or to a specific branch.
+def update_submodules(submodule=''):
+    """Update all of the submodules in the aggregate repository.
 
     Optional arguments:
-    repository -- the name of the repository as given by the directory name
-    branch -- the name of the branch to pull from
-    all_repositories -- update all repositorys located in the directory
+    submodule -- the submodule to update
     """
-    cmd = ['git', 'subrepo', 'pull']
-
-    if branch and repository:
-        cmd.extend([repository, '-b', branch])
-
-    elif repository:
-        cmd.append(repository)
-
-    elif all_repositories:
-        cmd.append('--all')
-
-    subprocess.call(cmd)
-
-
-def patch_repository(repository, patch_file, nested=False):
-    """Apply the given patch to the corresponding recipe in the directory.
-
-    Positional arguments:
-    repository -- the name of the repository as given by the directory name
-    patch_file -- the path to the patch file
-
-    Optional arguments:
-    nested -- whether or not the subrepo is nested inside its own package
-    """
-    patch_file = modifier.modify_patch(patch_file, repository, nested)
-
-    subprocess.call(['git', 'am', patch_file, '-3'])
+    subprocess.call(['git', 'submodule', 'update', submodule])
