@@ -27,12 +27,11 @@ install:
   - conda update -q --all
   - sudo apt update
   - sudo apt install git --assume-yes
-  - git clone https://github.com/ingydotnet/git-subrepo.git -b issue/216-G
-  - cd git-subrepo && sudo make install && cd ..
-  - conda install pytest pytest-cov pytest-mock
+  - conda install pytest pytest-cov
+  - pip install gitpython pygithub
   - pip install .
 
 script:
   - git config --global user.email "user@email.com"
   - git config --global user.name "User Name"
-  - pytest -s -v --cov=.
+  - pytest -v --cov=.
