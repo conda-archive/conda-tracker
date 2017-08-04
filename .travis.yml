@@ -6,6 +6,10 @@ language: python
 
 sudo: True
 
+env:
+  global:
+    - secure: CkZcQWV1jNqsYKEdlwfHr+1T2OCn0vB+MBxsEQxYqnEF5HXK/37orkHTMzYwo+Nls4p7FZdLQfuTxXaP5K5TOxFvhGcMcM6f4l59CBz5pa9VzSvErGP4GEeYRghNZq1xreblkQkSOzU3Ny1KsvAyn5xjt63RIRrc3Rxffl+XcPxP5oHYmcEzQIvFHFLAdk+N9GxVt6JWnWTIWTDwODfq//g8cWwDucdbTt8bsMdvturBky9YRS1f0lMPZ2nyN4NzLd2dLz5R8pzti7wqVq75szFNAKJXzwHrvv8lTVYKctA7Vc+Ccq2rKOxA4HHcAl0he4JU2YMlM9QYx2deug/ORywgJRvheZgsSXsx3AVwC+2YPlkVzUSvfMRbRmkBNoNc2p/Vt+BEVGhSAILg/Xbb1BYTmGpQrefsoYYlWdBZPtg7ZDpwbRnFptdLZzgV+L//kNdFJNNa0r8I5Ek5gWSv/QKBe4pptAgF3pX3O0I/DE9l6/zU8Yg4Pgf6du6TKpabE5F0WD7EKTZfPMm6Gcr11CIfU1LS3zsttMvlAYGmOXjnkzjgUv4S/NEg+F3SQ1+nIn2Ix901uQXEJ89u3dvgvtFkixmWwf1PAyWH1txiOokMP6/GlPh0rgZUqDae28ndBTJBH4czpAfncSalWGJHYYuh9DTbA2H25bL6vnsTsDU=
+
 matrix:
   include:
     - python: '2.7'
