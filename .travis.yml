@@ -4,11 +4,11 @@ dist: trusty
 
 language: python
 
-sudo: True
+sudo: False
 
 env:
   global:
-    - secure: CkZcQWV1jNqsYKEdlwfHr+1T2OCn0vB+MBxsEQxYqnEF5HXK/37orkHTMzYwo+Nls4p7FZdLQfuTxXaP5K5TOxFvhGcMcM6f4l59CBz5pa9VzSvErGP4GEeYRghNZq1xreblkQkSOzU3Ny1KsvAyn5xjt63RIRrc3Rxffl+XcPxP5oHYmcEzQIvFHFLAdk+N9GxVt6JWnWTIWTDwODfq//g8cWwDucdbTt8bsMdvturBky9YRS1f0lMPZ2nyN4NzLd2dLz5R8pzti7wqVq75szFNAKJXzwHrvv8lTVYKctA7Vc+Ccq2rKOxA4HHcAl0he4JU2YMlM9QYx2deug/ORywgJRvheZgsSXsx3AVwC+2YPlkVzUSvfMRbRmkBNoNc2p/Vt+BEVGhSAILg/Xbb1BYTmGpQrefsoYYlWdBZPtg7ZDpwbRnFptdLZzgV+L//kNdFJNNa0r8I5Ek5gWSv/QKBe4pptAgF3pX3O0I/DE9l6/zU8Yg4Pgf6du6TKpabE5F0WD7EKTZfPMm6Gcr11CIfU1LS3zsttMvlAYGmOXjnkzjgUv4S/NEg+F3SQ1+nIn2Ix901uQXEJ89u3dvgvtFkixmWwf1PAyWH1txiOokMP6/GlPh0rgZUqDae28ndBTJBH4czpAfncSalWGJHYYuh9DTbA2H25bL6vnsTsDU=
+    - secure: RUtbDS1lwuhRxnzBKMOGYc6Z2asK5IHEytqp1UY2OZC9bJhMNG9JTrg3m6bWZlB3g9+CojwkCisZQDz2z5E6ZYRbNqAM3etx81zKKnp2awpgyPJUXAlkr4n8aEAJ4x5r/1ojCQq3OfjYOYaNcFHDbdYdamNs+Yt0yKig9EudzblO0RkM2fx+iCn51oEK0XitlptJyG+cxU/EZuR+nNpiuqNB2a7aMZROZg/kp8sAKRXaz6Env3ZK5qsHodgGwOPqyd+TU/xLNmfzG3nZpVj83Y0CpHcQOzxIGtPF2wfrWdJM3IaHQfyrxCbDcl5TqvnJpUmSJtmBAfgYaYpkDcMOy2wAKbl/whH7pMFFGYIbHh2FUVyPC6rSFmq3+YTWayc4E/m8XU35dAVF6cSnFhJgeuuADk0jnXv4GaDRksa+kY66aLG3Uv9QSocQ1BKAyAdvi09KIwwthsju1AHF4icKm0+OTOn90uJWVIWZi2UBNJOlaBN/51dB4onV7HNvQfldEEcT/BBTurOVjwRVX6KVI35JBUDBARo0EFGliTosrAyAEwXBBW8hepqsNJoFu1NY/GeSXsvjdVEkpc4HS2NJ9+mC6okSKc7IJ79Ua7OirqfjEthhpVNp/OY6uZ8NZ+sCJQuP4KSHEuTZoGSywmfYZeWc1nGjHSGq4QzGbWbm48M=
 
 matrix:
   include:
@@ -29,8 +29,6 @@ install:
   - conda config --set always_yes yes
   - conda config --set auto_update_conda False
   - conda update -q --all
-  - sudo apt update
-  - sudo apt install git --assume-yes
   - conda install pytest pytest-cov
   - pip install gitpython pygithub
   - pip install .
