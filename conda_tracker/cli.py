@@ -9,9 +9,9 @@ def cli():
 
 
     conda-tracker includes multiple subcommands to assist in repo tracking:
-    $  conda-tracker add [OPTIONS] RECIPE_URL
-    $  conda-tracker update [OPTIONS] [RECIPE] [BRANCH]
-    $  conda-tracker patch [OPTIONS] RECIPE PATCH_FILE
+    \b $  conda-tracker add REPOSITORY_NAME
+
+    \b $  conda-tracker update REPOSITORY
 
     To see more information regarding each subcommand, type:
     $ conda-tracker subcommand --help
@@ -19,31 +19,62 @@ def cli():
 
 
 @cli.command()
-@click.argument('recipe_url')
-def add(recipe_url):
-    """Add a repository to the aggregate repository.
-
-    conda-tracker add requires the url of the repository as an argument.
-    This url can be either a link to the repo on a git hosting service,
-    or a git repository itself.
+@click.argument('repository_name')
+def create(repository_name):
+    """Create an aggregate repository that will house all submodules.
 
     Example:
-    $ conda-tracker add https://github.com/conda/conda-tracker.git
+    $  conda-tracker create aggregate_repo
     """
-    library.add_repository(recipe_url)
+    library.create_aggregate_repository(repository_name)
 
 
 @cli.command()
-@click.argument('recipe', required=False)
-def update(recipe):
-    """Update a repository to a specific branch or to the master branch.
+@click.argument('organization')
+@click.argument('aggregate_repository')
+@click.argument('token', required=False, default=None)
+def add(organization, aggregate_repository, token):
+    """Add all of the repositories of an organization into the aggregate repository.
 
-    conda-tracker update takes either the name of the repository or the
-    --all-recipes command line flag. If the name of the repository is
-    given a branch can also be given to update to a specific branch.
-
-    Examples:
-    $  conda-tracker update
-    $  conda-tracker update some_repository
+    Example:
+    $  conda-tracker add conda my_aggregate_repo
     """
-    library.update_repository(recipe)
+    organization_repositories = library.retrieve_organization_repositories(organization, token)
+    library.add_submodules(organization_repositories, aggregate_repository)
+
+
+@cli.command()
+@click.argument('repository', required=False)
+@click.option('--dry-run', is_flag=True)
+def update(repository, dry_run):
+    """Update all submodules inside the given aggregate repository.
+
+    Example:
+    $  conda-tracker update
+    """
+    library.update_submodules(repository, dry_run)
+
+
+@cli.command()
+@click.argument('organization')
+@click.argument('aggregate_repository')
+@click.argument('token', required=False, default=None)
+def gather(organization, aggregate_repository, token):
+    """Gather new organization repositories into an aggregate repository.
+
+    Example:
+    $  conda-tracker gather conda my_aggregate_repository
+    """
+    organization_repositories = library.retrieve_organization_repositories(organization, token)
+    library.gather_submodules(organization_repositories, aggregate_repository)
+
+
+@cli.command()
+@click.argument('aggregate_repository')
+def submit(aggregate_repository):
+    """Submit all changes to the origin remote.
+
+    Example:
+    $  conda-tracker submit my_aggregate_repository
+    """
+    library.submit_submodules(aggregate_repository)

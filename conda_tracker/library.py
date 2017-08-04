@@ -1,91 +1,181 @@
-import pkg_resources
-import subprocess
+import os
+
+import git
+from github import Github
 
 
-def repository_name(repository_url):
-    """Split the suffix from the URL.
+def create_aggregate_repository(repository_name, path='.'):
+    """Create a new repository that will house all submodules.
 
-    Positional arguments:
-    repository_url -- the link to the repository to clone
+    The repository will be created in the current working directory
+    or at the given path. An initial commit with a README is created
+    as submodules have buggy behavior in a bare repository.
+
+    Parameters
+    ----------
+    repository_name: str
+        The name of the repository to create.
+    path: str
+        The directory in which to create the repository.
+        Default is the current working directory.
+
+    Returns
+    -------
+    repository: git.Repo
+        The newly created repository.
+
     """
-    name = repository_url.rsplit('/', 1)[-1]
+    aggregate_repository = os.path.join(path, repository_name)
+    git.Repo.init(aggregate_repository)
+    new_repository = git.Repo(aggregate_repository)
 
-    # remove the .git ending when given git repositories
-    return name.replace('.git', '')
+    first_committed_file = os.path.join(aggregate_repository, 'README.rst')
+
+    with open(first_committed_file, 'w') as readme:
+        readme.write('aggregate repository')
+
+    new_repository.index.add([first_committed_file])
+    new_repository.index.commit('Initial commit')
+
+    return new_repository
 
 
-def retrieve_latest_commit(branch):
-    """Retrieve the last commit made on the given branch."""
-    subprocess.call(['git', 'rev-parse', branch])
+def access_github_api(token=None):
+    """Access the Github API with a personal access token.
 
+    Parameters
+    ----------
+    token: str
+        The Github personal access token.
+        If no token is given, the environment is searched for
+        the GITHUB_TOKEN environment variable.
 
-def retrieve_updated_submodules(submodule='.'):
-    """Retrieve a list of submodules that have been updated.
+    Returns
+    -------
+    response: github.Github
+        A github.Github object with API access methods
 
-    Updated submodules' hashes start with '+' when the command
-    git submodule status is run. The updated submodules are
-    returned in a list with the '+' stripped from their hashes.
+    Raises
+    ------
+    RuntimeError
+        When a token is not given and it is not found in the environment
     """
-    submodules = subprocess.check_output(['git', 'submodule', 'status',
-                                         submodule], universal_newlines=True)
+    if token is None:
+        try:
+            token = os.environ['GITHUB_TOKEN']
+        except KeyError:
+            raise RuntimeError('GITHUB_TOKEN environment variable not found. '
+                               'Please export the GITHUB_TOKEN variable to '
+                               'the environment or provide a '
+                               'personal access token.')
 
-    return [submodule.lstrip('+') for submodule in submodules.splitlines()
-            if submodule.startswith('+')]
-
-
-def retrieve_submodule_commits(branch):
-    """Retrieve the current submodule commit hashes for a specific branch."""
-    return subprocess.check_output(['git', 'ls-tree', branch],
-                                   universal_newlines=True).splitlines()
-
-
-def retrieve_submodule_files_changed():
-    diff_script = pkg_resources.resource_filename('conda_tracker',
-                                                  'diff-script.sh')
-
-    diff = subprocess.check_output(['bash', diff_script],
-                                   universal_newlines=True).splitlines()
-
-    submodule_changed_files = [line.split() for line in diff]
-
-    submodules_with_recipe_changes = set()
-    for submodule in submodule_changed_files:
-        for file in submodule:
-            if 'recipe/' in file:
-                submodules_with_recipe_changes.add(submodule[0])
-
-    return submodules_with_recipe_changes
+    return Github(token)
 
 
-def change_submodule_revision(submodule, revision):
-    """Change the submodule commit reference to a different revision.
+def retrieve_organization_repositories(organization, token=None):
+    """Retrieve all of the repositories from the organization.
 
-    Positional arguments:
-    submodule -- the submodule to change
-    revision -- the commit to point to
+    Parameters
+    ----------
+    organization: str
+        The name of the organization to fetch repositories from.
+    token: str
+        The Github personal access token.
+        If no token is given, the environment is searched for
+        the GITHUB_TOKEN environment variable.
+
+    Returns
+    -------
+    repositories: github.Github.PaginatedList
+        An array_like structure that contains github.Github repo objects.
     """
-    revision_script = pkg_resources.resource_filename('conda_tracker',
-                                                      'change_revision.sh')
-
-    subprocess.call(['bash', revision_script, submodule, revision])
+    return access_github_api(token).get_organization(organization).get_repos()
 
 
-def add_repository(repository_url):
-    """Add a sub-repository to the aggregate repository.
+def add_submodules(source_repository, aggregate_repository):
+    """Add submodules from the source_repository to the aggregate_repository.
 
-    Positional arguments:
-    repository_url -- the url to the repository to add
+    Parameters
+    ----------
+    source_repository: github.Github.PaginatedList
+        The repositories obtained from the Github API.
+    aggregate_repository: str
+        The directory name of the aggregate_repository.
 
-    Optional arguments:
-    nested -- whether or not the subrepo is nested inside its own package
+    Returns
+    -------
+    None
     """
-    subprocess.call(['git', 'submodule', 'add', repository_url])
+    aggregate_repository = git.Repo(aggregate_repository)
+
+    for repository in source_repository:
+        aggregate_repository.create_submodule(name=repository.name,
+                                              path=repository.name,
+                                              url=repository.clone_url)
+
+        aggregate_repository.index.add([repository.name])
+
+    aggregate_repository.index.commit('Add submodules')
 
 
-def update_submodules(submodule=''):
+def update_submodules(aggregate_repository):
     """Update all of the submodules in the aggregate repository.
 
-    Optional arguments:
-    submodule -- the submodule to update
+    Parameters
+    ----------
+    aggregate_repository: str
+        The directory name of the aggregate repository.
+
+    Returns
+    -------
+    None
     """
-    subprocess.call(['git', 'submodule', 'update', submodule])
+    aggregate_repository = git.Repo(aggregate_repository)
+
+    for submodule in aggregate_repository.submodules:
+        submodule.update()
+        aggregate_repository.index.add([submodule])
+
+    aggregate_repository.index.commit('Updated all submodules')
+
+
+def gather_submodules(source_repository, aggregate_repository):
+    """Gather all of the submodules in the source_repository that are not in the aggregate_repository.
+
+    Parameters
+    ----------
+    source_repository: github.Github.PaginatedList
+        The repositories obtained from the Github API.
+    aggregate_repository: str
+        The directory name of the aggregate_repository.
+
+    Returns
+    -------
+    None
+    """
+    aggregate_repository = git.Repo(aggregate_repository)
+    aggregate_repository_submodules = [submodule.name for submodule
+                                       in aggregate_repository.submodules]
+
+    for repository in source_repository:
+        if repository.name not in aggregate_repository_submodules:
+            aggregate_repository.create_submodule(name=repository.name,
+                                                  path=repository.name,
+                                                  url=repository.clone_url)
+
+
+def submit_submodules(aggregate_repository):
+    """Push all of the commits in the aggregate repository to origin.
+
+    Parameters
+    ----------
+    aggregate_repository: str
+        The directory name of the aggregate_repository.
+
+    Returns
+    -------
+    None
+    """
+    aggregate_repository = git.Repo(aggregate_repository)
+    origin = aggregate_repository.remote(name='origin')
+    origin.push()
