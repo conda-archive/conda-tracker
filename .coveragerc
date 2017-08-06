@@ -1,0 +1,6 @@
+[report]
+omit =
+    */setup.py
+    */__init__.py
+    tests/*
+    */__main__.py
