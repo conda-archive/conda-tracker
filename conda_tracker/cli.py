@@ -45,14 +45,13 @@ def add(organization, aggregate_repository, token):
 
 @cli.command()
 @click.argument('repository', required=False)
-@click.option('--dry-run', is_flag=True)
-def update(repository, dry_run):
+def update(repository):
     """Update all submodules inside the given aggregate repository.
 
     Example:
     $  conda-tracker update
     """
-    library.update_submodules(repository, dry_run)
+    library.update_submodules(repository)
 
 
 @cli.command()
