@@ -93,7 +93,7 @@ def retrieve_organization_repositories(organization, token=None):
     return access_github_api(token).get_organization(organization).get_repos()
 
 
-def add_submodules(source_repository, aggregate_repository, omitted_repositories=' '):
+def add_submodules(source_repository, aggregate_repository, refined_repositories=''):
     """Add submodules from the source_repository to the aggregate_repository.
 
     Parameters
@@ -102,9 +102,9 @@ def add_submodules(source_repository, aggregate_repository, omitted_repositories
         The repositories obtained from the Github API.
     aggregate_repository: str
         The directory name of the aggregate_repository.
-    omitted_repositories: str
+    refined_repositories: str
         A regular expression to match to repositories
-        that should be omitted.
+        that should be downloaded.
         Defaults to ' '
 
     Returns
@@ -113,10 +113,10 @@ def add_submodules(source_repository, aggregate_repository, omitted_repositories
     """
     aggregate_repository = git.Repo(aggregate_repository)
 
-    omitted_repositories = re.compile(omitted_repositories)
+    refined_repositories = re.compile(refined_repositories)
 
     for repository in source_repository:
-        if not omitted_repositories.match(repository.name):
+        if refined_repositories.match(repository.name):
             aggregate_repository.create_submodule(name=repository.name,
                                                   path=repository.name,
                                                   url=repository.clone_url)

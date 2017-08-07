@@ -39,15 +39,15 @@ def create(repository_name):
 @click.argument('organization')
 @click.argument('aggregate_repository')
 @click.argument('token', required=False, default=None)
-@click.option('--omit', default=' ')
-def add(organization, aggregate_repository, token, omit):
+@click.option('--refine', default='')
+def add(organization, aggregate_repository, token, refine):
     """Add all of the repositories of an organization into the aggregate repository.
 
     Example:
     $  conda-tracker add conda my_aggregate_repo
     """
     organization_repositories = library.retrieve_organization_repositories(organization, token)
-    library.add_submodules(organization_repositories, aggregate_repository, omit)
+    library.add_submodules(organization_repositories, aggregate_repository, refine)
 
 
 @cli.command()
