@@ -1,4 +1,5 @@
 import os
+import re
 
 import git
 from github import Github
@@ -29,7 +30,7 @@ def create_aggregate_repository(repository_name, path='.'):
     git.Repo.init(aggregate_repository)
     new_repository = git.Repo(aggregate_repository)
 
-    first_committed_file = os.path.join(aggregate_repository, 'README.rst')
+    first_committed_file = os.path.abspath(os.path.join(aggregate_repository, 'README.rst'))
 
     with open(first_committed_file, 'w') as readme:
         readme.write('aggregate repository')
@@ -92,7 +93,7 @@ def retrieve_organization_repositories(organization, token=None):
     return access_github_api(token).get_organization(organization).get_repos()
 
 
-def add_submodules(source_repository, aggregate_repository):
+def add_submodules(source_repository, aggregate_repository, omitted_repositories=' '):
     """Add submodules from the source_repository to the aggregate_repository.
 
     Parameters
@@ -101,6 +102,10 @@ def add_submodules(source_repository, aggregate_repository):
         The repositories obtained from the Github API.
     aggregate_repository: str
         The directory name of the aggregate_repository.
+    omitted_repositories: str
+        A regular expression to match to repositories
+        that should be omitted.
+        Defaults to ' '
 
     Returns
     -------
@@ -108,12 +113,15 @@ def add_submodules(source_repository, aggregate_repository):
     """
     aggregate_repository = git.Repo(aggregate_repository)
 
-    for repository in source_repository:
-        aggregate_repository.create_submodule(name=repository.name,
-                                              path=repository.name,
-                                              url=repository.clone_url)
+    omitted_repositories = re.compile(omitted_repositories)
 
-        aggregate_repository.index.add([repository.name])
+    for repository in source_repository:
+        if not omitted_repositories.match(repository.name):
+            aggregate_repository.create_submodule(name=repository.name,
+                                                  path=repository.name,
+                                                  url=repository.clone_url)
+
+            aggregate_repository.index.add([repository.name])
 
     aggregate_repository.index.commit('Add submodules')
 
