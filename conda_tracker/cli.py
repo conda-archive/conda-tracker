@@ -9,9 +9,15 @@ def cli():
 
 
     conda-tracker includes multiple subcommands to assist in repo tracking:
-    \b $  conda-tracker add REPOSITORY_NAME
+    \b $  conda-tracker create REPOSITORY
+
+    \b $  conda-tracker add ORGANIZATION REPOSITORY
 
     \b $  conda-tracker update REPOSITORY
+
+    \b $  conda-tracker gather ORGANIZATION REPOSITORY
+
+    \b $  conda-tracker submit REPOSITORY
 
     To see more information regarding each subcommand, type:
     $ conda-tracker subcommand --help
@@ -33,14 +39,15 @@ def create(repository_name):
 @click.argument('organization')
 @click.argument('aggregate_repository')
 @click.argument('token', required=False, default=None)
-def add(organization, aggregate_repository, token):
+@click.option('--refine', default='')
+def add(organization, aggregate_repository, token, refine):
     """Add all of the repositories of an organization into the aggregate repository.
 
     Example:
     $  conda-tracker add conda my_aggregate_repo
     """
     organization_repositories = library.retrieve_organization_repositories(organization, token)
-    library.add_submodules(organization_repositories, aggregate_repository)
+    library.add_submodules(organization_repositories, aggregate_repository, refine)
 
 
 @cli.command()

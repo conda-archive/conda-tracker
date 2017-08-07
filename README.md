@@ -1,5 +1,7 @@
 # conda-tracker
 
+[![Build Status](https://travis-ci.org/conda/conda-tracker.svg?branch=master)](https://travis-ci.org/conda/conda-tracker)
+
 conda-tracker is a tool that links git repositories and patches into an aggregate 
 repository. By grouping repositories and patches into a single repository, tasks
 such as updating conda recipes prior to submitting to conda-concourse-ci become

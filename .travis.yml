@@ -6,14 +6,8 @@ language: python
 
 sudo: False
 
-env:
-  global:
-    - secure: RUtbDS1lwuhRxnzBKMOGYc6Z2asK5IHEytqp1UY2OZC9bJhMNG9JTrg3m6bWZlB3g9+CojwkCisZQDz2z5E6ZYRbNqAM3etx81zKKnp2awpgyPJUXAlkr4n8aEAJ4x5r/1ojCQq3OfjYOYaNcFHDbdYdamNs+Yt0yKig9EudzblO0RkM2fx+iCn51oEK0XitlptJyG+cxU/EZuR+nNpiuqNB2a7aMZROZg/kp8sAKRXaz6Env3ZK5qsHodgGwOPqyd+TU/xLNmfzG3nZpVj83Y0CpHcQOzxIGtPF2wfrWdJM3IaHQfyrxCbDcl5TqvnJpUmSJtmBAfgYaYpkDcMOy2wAKbl/whH7pMFFGYIbHh2FUVyPC6rSFmq3+YTWayc4E/m8XU35dAVF6cSnFhJgeuuADk0jnXv4GaDRksa+kY66aLG3Uv9QSocQ1BKAyAdvi09KIwwthsju1AHF4icKm0+OTOn90uJWVIWZi2UBNJOlaBN/51dB4onV7HNvQfldEEcT/BBTurOVjwRVX6KVI35JBUDBARo0EFGliTosrAyAEwXBBW8hepqsNJoFu1NY/GeSXsvjdVEkpc4HS2NJ9+mC6okSKc7IJ79Ua7OirqfjEthhpVNp/OY6uZ8NZ+sCJQuP4KSHEuTZoGSywmfYZeWc1nGjHSGq4QzGbWbm48M=
-
 matrix:
   include:
-    - python: '2.7'
-      os: linux
     - python: '3.6'
       os: linux
 
