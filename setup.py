@@ -7,9 +7,9 @@ setup(name='conda-tracker',
       description='Manage conda recipes',
       packages=['conda_tracker'],
       install_requires=[
-        'click>=6.7',
-        'GitPython>=2.1'
-        'PyGithub>=1.3',
+          'click>=6.7',
+          'GitPython>=2.1',
+          'PyGithub>=1.3',
       ],
       entry_points='''
         [console_scripts]
