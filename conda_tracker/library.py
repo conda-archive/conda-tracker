@@ -121,8 +121,6 @@ def add_submodules(source_repository, aggregate_repository, refined_repositories
                                                   path=repository.name,
                                                   url=repository.clone_url)
 
-            aggregate_repository.index.add([repository.name])
-
     aggregate_repository.index.commit('Add submodules')
 
 
