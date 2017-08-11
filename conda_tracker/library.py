@@ -4,6 +4,8 @@ import re
 import git
 from github import Github
 
+from conda_tracker.utils import remove_submodule
+
 
 def create_aggregate_repository(repository_name, path='.'):
     """Create a new repository that will house all submodules.
@@ -136,13 +138,16 @@ def update_submodules(aggregate_repository):
     -------
     None
     """
-    aggregate_repository = git.Repo(aggregate_repository)
+    aggregate_repository_repo = git.Repo(aggregate_repository)
 
-    for submodule in aggregate_repository.submodules:
-        submodule.update()
-        aggregate_repository.index.add([submodule])
+    for submodule in aggregate_repository_repo.submodules:
+        try:
+            submodule.update()
+        except git.exc.GitCommandError:
+            print('Removing submodule {}' .format(submodule.name))
+            remove_submodule(aggregate_repository, submodule.name)
 
-    aggregate_repository.index.commit('Updated all submodules')
+    aggregate_repository_repo.index.commit('Updated all submodules')
 
 
 def gather_submodules(source_repository, aggregate_repository):

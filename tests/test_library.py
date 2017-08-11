@@ -2,10 +2,11 @@ import os
 
 import git
 
-from conda_tracker import library
+from conda_tracker import library, utils
 
 
 def test_create_repository(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
 
@@ -28,7 +29,8 @@ def test_retrieve_organization_repositories():
     assert all(repository in repository_names for repository in conda)
 
 
-def test_add_submodules(tmpdir):
+def test_add_and_remove_submodules(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
     aggregate_repository_repo = git.Repo(aggregate_repository)
@@ -44,8 +46,13 @@ def test_add_submodules(tmpdir):
     assert len(aggregate_repository_repo.untracked_files) == 0
     assert aggregate_repository_repo.head.commit.message == 'Add submodules'
 
+    utils.remove_submodule(aggregate_repository, 'conda')
+
+    assert 'conda' not in os.listdir(aggregate_repository)
+
 
 def test_update_submodules(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
     aggregate_repository_repo = git.Repo(aggregate_repository)
@@ -69,6 +76,7 @@ def test_update_submodules(tmpdir):
 
 
 def test_gather_submodules(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
     aggregate_repository_repo = git.Repo(aggregate_repository)
