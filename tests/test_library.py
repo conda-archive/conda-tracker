@@ -74,6 +74,9 @@ def test_update_submodules(tmpdir):
 
     assert 'c272ad7f5a018495a8d60c05919c2ca396e7296f' in aggregate_repository_git.execute(['git', 'submodule'])
 
+    assert not aggregate_repository_repo.is_dirty()
+    assert len(aggregate_repository_repo.untracked_files) == 0
+
 
 def test_gather_submodules(tmpdir):
     tmpdir = str(tmpdir)
