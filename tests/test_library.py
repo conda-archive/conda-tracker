@@ -2,10 +2,11 @@ import os
 
 import git
 
-from conda_tracker import library
+from conda_tracker import library, utils
 
 
 def test_create_repository(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
 
@@ -28,9 +29,11 @@ def test_retrieve_organization_repositories():
     assert all(repository in repository_names for repository in conda)
 
 
-def test_add_submodules(tmpdir):
+def test_add_and_remove_submodules(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
+    aggregate_repository_repo = git.Repo(aggregate_repository)
     conda_repositories = library.retrieve_organization_repositories('conda')
 
     library.add_submodules(conda_repositories, aggregate_repository)
@@ -38,9 +41,18 @@ def test_add_submodules(tmpdir):
     conda = ['conda', 'conda-build', 'conda-docs', 'conda-ui']
 
     assert all(repository in os.listdir(aggregate_repository) for repository in conda)
+    assert all((repository, 0) in aggregate_repository_repo.index.entries for repository in conda)
+    assert not aggregate_repository_repo.is_dirty()
+    assert len(aggregate_repository_repo.untracked_files) == 0
+    assert aggregate_repository_repo.head.commit.message == 'Add submodules'
+
+    utils.remove_submodule(aggregate_repository, 'conda')
+
+    assert 'conda' not in os.listdir(aggregate_repository)
 
 
 def test_update_submodules(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
     aggregate_repository_repo = git.Repo(aggregate_repository)
@@ -62,8 +74,12 @@ def test_update_submodules(tmpdir):
 
     assert 'c272ad7f5a018495a8d60c05919c2ca396e7296f' in aggregate_repository_git.execute(['git', 'submodule'])
 
+    assert not aggregate_repository_repo.is_dirty()
+    assert len(aggregate_repository_repo.untracked_files) == 0
+
 
 def test_gather_submodules(tmpdir):
+    tmpdir = str(tmpdir)
     library.create_aggregate_repository('test_aggregate_repo', tmpdir)
     aggregate_repository = os.path.join(tmpdir, 'test_aggregate_repo')
     aggregate_repository_repo = git.Repo(aggregate_repository)

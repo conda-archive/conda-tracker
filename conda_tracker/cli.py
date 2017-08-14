@@ -51,7 +51,7 @@ def add(organization, aggregate_repository, token, refine):
 
 
 @cli.command()
-@click.argument('repository', required=False)
+@click.argument('repository')
 def update(repository):
     """Update all submodules inside the given aggregate repository.
 
