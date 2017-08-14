@@ -52,13 +52,14 @@ def add(organization, aggregate_repository, token, refine):
 
 @cli.command()
 @click.argument('repository')
-def update(repository):
+@click.option('--remote', is_flag=True)
+def update(repository, remote):
     """Update all submodules inside the given aggregate repository.
 
     Example:
     $  conda-tracker update
     """
-    library.update_submodules(repository)
+    library.update_submodules(repository, remote)
 
 
 @cli.command()
