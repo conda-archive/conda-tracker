@@ -23,8 +23,8 @@ def test_cli_workflow():
         assert all(repository in os.listdir('my_agg_repo') for repository in conda_refined_repos)
         assert all(repository not in os.listdir('my_agg_repo') for repository in conda_omitted_repos)
 
-        update = runner.invoke(cli, ['update', 'my_agg_repo'])
-        
+        update = runner.invoke(cli, ['update', 'my_agg_repo', '--remote'])
+
         assert update.exit_code == 0
 
         gather = runner.invoke(cli, ['gather', 'conda', 'my_agg_repo'])

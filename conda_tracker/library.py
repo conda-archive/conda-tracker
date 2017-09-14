@@ -126,7 +126,7 @@ def add_submodules(source_repository, aggregate_repository, refined_repositories
     aggregate_repository.index.commit('Add submodules')
 
 
-def update_submodules(aggregate_repository):
+def update_submodules(aggregate_repository, remote=False):
     """Update all of the submodules in the aggregate repository.
 
     Parameters
@@ -142,7 +142,7 @@ def update_submodules(aggregate_repository):
 
     for submodule in aggregate_repository_repo.submodules:
         try:
-            submodule.update()
+            submodule.update(to_latest_revision=remote)
         except git.exc.GitCommandError:
             print('Removing submodule {}' .format(submodule.name))
             remove_submodule(aggregate_repository, submodule.name)
